@@ -1,6 +1,11 @@
 # Confirmerator
 
-Listen to blockchain networks such as Bitcoin and Ethereum for transactions on given addresses and publish messages to NATS to be handled for by other programs such as a notification pusher.
+Listen to blockchain networks such as Bitcoin and Ethereum for transactions on given addresses 
+and publish messages to NATS to be handled for by other programs such as a notification pusher.
+
+The project as a whole provides users with the ability receive notifications to their phones 
+when their transactions are confirmed. Addresses the user wants to monitor are added through
+the mobile application.
 
 Currently functioning as intended for Ethereum but is with a Work-in-Progress.  
 
@@ -36,7 +41,22 @@ Add NATS url:
 
 * Connect to bitcoin zmq
 * Monitor smart-contracts
-* Add suppoprt for other databases
+* Respond to confirmation count request
+* Add support for other databases
+
+
+#### Donations
+Currently excepting donations to run the servers for the blockchain nodes and confirmerator.
+Running thee servers is a costly endeavor and any contribution would help tremendously.
+
+* BTC: 3LeENCt2EHY2xZTcJrVGjZiGwcpsEd3pK7
+* BCH: 1T7xhy8oQXUTL9UL413t7pkU7ZH7mJgfL
+* ETH: 0x651Db43067409963DAdb7c5B7D8852EeE7054290
+* ETC: 0xf4F57a09933B2C053Bd484322A317f794756CE09
+* XMR: 48rVJGXf7999yPsZX6s28yNtuJvaUPUpS7JEdrMjK43RDyxUpCs36axe41YLLaavfjWcT9YVBUb2n8EYb8rVnrmS3Fgecut
+* XLM: GDAAB7ZC4FEVZUW7QR6HCUFRO6GQOA4RKG5LAG7VUB43YZGSECNKURUP
+* XRP: rssZiMKpNYBBJo8rYnLmiRgVksiWFo5612
+
 
 ## Contribution
 
