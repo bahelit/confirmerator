@@ -1,8 +1,9 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"os"
 
@@ -16,7 +17,7 @@ import (
 )
 
 var (
-	dbHandle   *sql.DB
+	dbHandle   *mongo.Client
 	ethNode    string
 	ethWSNode  string
 	ethAddress common.Address
@@ -32,11 +33,16 @@ const (
 
 func main() {
 	var ok bool
-	dbHandle, err := database.InitDB(dbHandle)
+	err := database.InitDB(dbHandle)
 	if err != nil {
 		log.Fatal("Failed to connect to postgres", err)
 	}
-	defer dbHandle.Close()
+	defer func() {
+		err := dbHandle.Disconnect(context.Background())
+		if err != nil {
+			log.Printf("ERROR: failed to disconnect from mongo: %v", err)
+		}
+	}()
 
 	ethNode, ok = os.LookupEnv(ethNodeURL)
 	if !ok {
@@ -64,14 +70,14 @@ func main() {
 		log.Fatal("Failed to connect to ethereum", err)
 	}
 
-	ethAccounts, err := database.GetAccounts(dbHandle, database.ChainEthereum)
+	ethAccounts, err := database.GetBlockchainAccounts(dbHandle, database.ChainEthereum)
 	if err != nil {
 		// Can't do comparisons so just continue.
 		log.Println(err)
 	}
 	fmt.Println("Number of Ethereum addresses to look up: ", len(ethAccounts))
 
-	// On start-up print all the ethereum accounts we are tracking tot the console
+	// On start-up print all the ethereum accounts we are tracking to the console
 	for _, acct := range ethAccounts {
 		if shared.IsValidAddress(ethAddress) {
 			ethAddress := common.HexToAddress(acct.Address)

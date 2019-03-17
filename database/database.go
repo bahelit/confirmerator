@@ -2,19 +2,23 @@
 package database
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
+	"log"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 const (
-	dbhost = "DBHOST"
-	dbport = "DBPORT"
-	dbuser = "DBUSER"
-	dbpass = "DBPASS"
-	dbname = "DBNAME"
+	dbuser   = "DBUSER"
+	dbpass   = "DBPASS"
+	mongoURI = "MONGOURI"
 )
 
 const (
@@ -31,47 +35,51 @@ const (
 	PlatformAndroid
 )
 
+const (
+	CollectionAccount = "account"
+	CollectionDevice  = "device"
+	CollectionUser    = "user"
+)
+
 type Account struct {
-	RowID      int    `json:"rowID"`
+	ID         int    `json:"id"`
 	UserID     int    `json:"userID"`
 	Address    string `json:"address"`
 	Nickname   string `json:"nickname"`
-	BlockChain int16  `json:"blockchain"`
+	Blockchain int16  `json:"blockchain"`
 	AccType    int16  `json:"accountType"`
 	Device     string `json:"device"`
 }
 
-func InitDB(db *sql.DB) (*sql.DB, error) {
+var (
+	Database = "confirmerator"
+)
+
+func GetCollection(client *mongo.Client, collection string) *mongo.Collection {
+	return client.Database(Database).Collection(collection)
+}
+
+func InitDB(client *mongo.Client) error {
 	config := dbConfig()
-	var err error
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		config[dbhost], config[dbport],
-		config[dbuser], config[dbpass], config[dbname])
 
-	db, err = sql.Open("postgres", psqlInfo)
-	if err != nil {
-		return nil, err
-	}
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("Successfully connected to postgres!")
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config[mongoURI]))
 
-	return db, nil
+	// Check the connection
+	ctx, _ = context.WithTimeout(context.Background(), 2*time.Second)
+	err = client.Ping(ctx, readpref.Primary())
+	if err != nil {
+		log.Fatalf("ERROR: failed to connect to mongodb: %v", err)
+	}
+
+	fmt.Println("Connected to MongoDB!")
+
+	return nil
 }
 
 func dbConfig() map[string]string {
 	conf := make(map[string]string)
-	host, ok := os.LookupEnv(dbhost)
-	if !ok {
-		panic("DBHOST environment variable required but not set")
-	}
-	port, ok := os.LookupEnv(dbport)
-	if !ok {
-		panic("DBPORT environment variable required but not set")
-	}
+
 	user, ok := os.LookupEnv(dbuser)
 	if !ok {
 		panic("DBUSER environment variable required but not set")
@@ -80,66 +88,63 @@ func dbConfig() map[string]string {
 	if !ok {
 		panic("DBPASS environment variable required but not set")
 	}
-	name, ok := os.LookupEnv(dbname)
+	mongoURI, ok := os.LookupEnv(mongoURI)
 	if !ok {
 		panic("DBNAME environment variable required but not set")
 	}
-	conf[dbhost] = host
-	conf[dbport] = port
+
 	conf[dbuser] = user
 	conf[dbpass] = password
-	conf[dbname] = name
+	conf[mongoURI] = mongoURI
 	return conf
 }
 
-// getAccounts retrieve a list of accounts for a particular blockchain.
-func GetAccounts(db *sql.DB, blockchain int16) ([]Account, error) {
+// GetAccounts retrieve a list of accounts for a particular blockchain.
+func GetBlockchainAccounts(client *mongo.Client, blockchain int16) ([]Account, error) {
 	accounts := make([]Account, 0)
-	stmt, err := db.Prepare("SELECT id, user_id, address, type, nick_name FROM account WHERE blockchain = $1")
-	if err != nil {
-		return nil, err
-	}
-	defer stmt.Close()
 
-	rows, err := stmt.Query(blockchain)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+	collection := GetCollection(client, CollectionAccount)
 
-	for rows.Next() {
-		var account Account
-		err = rows.Scan(&account.RowID, &account.UserID, &account.Address, &account.AccType, &account.Nickname)
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	cur, err := collection.Find(ctx, bson.M{"blockchain": blockchain})
+	if err != nil {
+		log.Fatalf("ERROR: failed to get collection: %v", err)
+	}
+	defer func() {
+		err := cur.Close(ctx)
 		if err != nil {
-			return nil, err
+			log.Printf("ERROR: failed to close cursor: %v", err)
 		}
+	}()
 
-		accounts = append(accounts, account)
+	for cur.Next(ctx) {
+		var result bson.M
+		err := cur.Decode(&result)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// do something with result....
 	}
-	if err = rows.Err(); err != nil {
-		return nil, err
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
 	}
 
 	return accounts, nil
 }
 
-// getAndroidDevices retrieve a list of android devices associated with the user.
-func GetDevice(db *sql.DB, platform int16, userID int) (string, error) {
+// GetDevice retrieve a single device associated with the user for a given platform.
+func GetDevice(client *mongo.Client, platform int16, userID int) (string, error) {
 	var device string
-	stmt, err := db.Prepare("SELECT DISTINCT ON (device.device_identifier) device_identifier	FROM device	WHERE active = TRUE AND platform = $1 AND user_id = $2")
-	if err != nil {
-		return "", err
-	}
-	defer stmt.Close()
+	collection := GetCollection(client, CollectionDevice)
 
-	row := stmt.QueryRow(platform, userID)
-	switch err := row.Scan(&device); err {
-	case sql.ErrNoRows:
-		fmt.Println("No devices found!")
-	case nil:
-		return device, nil
-	default:
-		return "", err
+	var result struct {
+		Value float64
+	}
+	filter := bson.M{"name": "pi"}
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	err := collection.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	return device, nil

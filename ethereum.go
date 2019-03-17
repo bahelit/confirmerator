@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"math"
@@ -14,6 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/nats-io/go-nats"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // getBalance Returns the current balance from the latest block.
@@ -77,7 +77,7 @@ func queryBlock(client *ethclient.Client, header *types.Header) (*types.Block, e
 	return block, nil
 }
 
-func queryTransactions(db *sql.DB, client *ethclient.Client, block *types.Block, accounts []database.Account,
+func queryTransactions(db *mongo.Client, client *ethclient.Client, block *types.Block, accounts []database.Account,
 	nc *nats.Conn, ec *nats.EncodedConn) error {
 	// We can read the transactions in a block by calling the Transaction method which returns a list of Transaction type.
 	// It's then trivial to iterate over the collection and retrieve any information regarding the transaction.
@@ -127,10 +127,11 @@ func queryTransactions(db *sql.DB, client *ethclient.Client, block *types.Block,
 		}
 
 	}
+
 	return nil
 }
 
-func wsSubscribe(db *sql.DB, nc *nats.Conn, ec *nats.EncodedConn, client *ethclient.Client) error {
+func wsSubscribe(db *mongo.Client, nc *nats.Conn, ec *nats.EncodedConn, ethClient *ethclient.Client) error {
 	headers := make(chan *types.Header)
 
 	wsClient, err := ethclient.Dial(ethWSNode)
@@ -153,26 +154,25 @@ func wsSubscribe(db *sql.DB, nc *nats.Conn, ec *nats.EncodedConn, client *ethcli
 		case header := <-headers:
 			//fmt.Println(header.Hash().Hex()) // 0xbc10defa8dda384c96a17640d84de5578804945d347072e091b4e5f390ddea7f
 			//fmt.Println("Block number: ", header.Number)
-			ethAccounts, err := database.GetAccounts(db, database.ChainEthereum)
+			ethAccounts, err := database.GetBlockchainAccounts(db, database.ChainEthereum)
 			if err != nil {
 				// Can't do comparisons so just continue.
 				log.Println(err)
 				continue
 			}
 
-			block, err := queryBlock(client, header)
+			block, err := queryBlock(ethClient, header)
 			if err != nil {
 				//log.Println(err)
 				continue
 			}
 
 			if len(block.Transactions()) > 0 {
-				queryTransactions(db, client, block, ethAccounts, nc, ec)
+				err := queryTransactions(db, ethClient, block, ethAccounts, nc, ec)
+				log.Printf("Failed to query transaction: %v", err)
 			} else {
 				fmt.Println("Zero transactions in block")
 			}
 		}
 	}
-
-	return nil
 }
