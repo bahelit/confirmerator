@@ -43,7 +43,7 @@ func GetDevice(client *mongo.Client, platform int16, userID string) (string, err
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	collection := database.GetCollection(client, database.CollectionDevice)
 
-	filter := bson.M{"platform": platform, "userID": userID}
+	filter := bson.M{"platform": platform, "userid": userID}
 	err := collection.FindOne(ctx, filter).Decode(&device)
 	if err != nil && err != mongo.ErrNoDocuments {
 		log.Printf("ERROR: failed to query device: %v - err: %v", userID, err)
@@ -79,7 +79,7 @@ func GetDevices(client *mongo.Client, id string) ([]Device, error) {
 		devices = append(devices, account)
 	}
 	if err := cur.Err(); err != nil {
-		log.Fatal(err)
+		log.Printf("ERROR: failed to read cursor for device - err: %v", err)
 	}
 
 	return devices, nil

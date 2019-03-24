@@ -27,7 +27,7 @@ func getBalance(client *ethclient.Client, address common.Address) *big.Float {
 	//blockNumber := big.NewInt(5532993)
 	balance, err := client.BalanceAt(context.Background(), account, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("INFO: failed to get balance for: %v - err: %v", account, err)
 	}
 	//fmt.Println(balance)
 
