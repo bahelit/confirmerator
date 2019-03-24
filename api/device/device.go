@@ -1,8 +1,8 @@
 package device
 
 type Device struct {
-	ID         int    `json:"id"`
-	UserID     int    `json:"userID"`
+	ID         string `json:"id" bson:"_id"`
+	UserID     string `json:"userID"`
 	Platform   int16  `json:"platform"`
 	Active     bool   `json:"active"`
 	Identifier string `json:"identifier"`

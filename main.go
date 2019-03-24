@@ -3,21 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"os"
 
+	"github.com/bahelit/confirmerator/api/chain_account"
 	"github.com/bahelit/confirmerator/database"
 	"github.com/bahelit/confirmerator/shared"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	_ "github.com/lib/pq"
 	"github.com/nats-io/go-nats"
 )
 
 var (
-	dbHandle   *mongo.Client
 	ethNode    string
 	ethWSNode  string
 	ethAddress common.Address
@@ -33,12 +31,12 @@ const (
 
 func main() {
 	var ok bool
-	err := database.InitDB(dbHandle)
-	if err != nil {
-		log.Fatal("Failed to connect to postgres", err)
+	client, err := database.InitDB()
+	if err != nil || client == nil {
+		log.Fatalf("Failed to connect to mongodb, bail'n %v", err)
 	}
 	defer func() {
-		err := dbHandle.Disconnect(context.Background())
+		err := client.Disconnect(context.Background())
 		if err != nil {
 			log.Printf("ERROR: failed to disconnect from mongo: %v", err)
 		}
@@ -65,12 +63,12 @@ func main() {
 	natsEncoder, _ := nats.NewEncodedConn(natsConn, nats.JSON_ENCODER)
 	defer natsEncoder.Close()
 
-	client, err := ethclient.Dial(ethNode)
+	ethClient, err := ethclient.Dial(ethNode)
 	if err != nil {
 		log.Fatal("Failed to connect to ethereum", err)
 	}
 
-	ethAccounts, err := database.GetBlockchainAccounts(dbHandle, database.ChainEthereum)
+	ethAccounts, err := chain_account.GetAccountsForBlockchain(client, database.ChainEthereum)
 	if err != nil {
 		// Can't do comparisons so just continue.
 		log.Println(err)
@@ -81,7 +79,7 @@ func main() {
 	for _, acct := range ethAccounts {
 		if shared.IsValidAddress(ethAddress) {
 			ethAddress := common.HexToAddress(acct.Address)
-			ethValue := getBalance(client, ethAddress)
+			ethValue := getBalance(ethClient, ethAddress)
 			msg := fmt.Sprintln("Current balance: ", ethValue, " Address: ", acct.Nickname)
 			fmt.Print(msg)
 			//publishEthereumAndroid(natsConn, natsEncoder, testDevice, msg)
@@ -89,7 +87,7 @@ func main() {
 		}
 	}
 
-	err = wsSubscribe(dbHandle, natsConn, natsEncoder, client)
+	err = wsSubscribe(client, natsConn, natsEncoder, ethClient)
 	if err != nil {
 		log.Fatal(err)
 	}

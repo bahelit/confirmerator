@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"net/http"
 
-	"github.com/bahelit/confirmerator/api/account"
+	"github.com/bahelit/confirmerator/api/chain_account"
 	"github.com/bahelit/confirmerator/api/device"
 	"github.com/bahelit/confirmerator/api/user"
 	"github.com/go-chi/chi"
@@ -35,14 +35,14 @@ var (
 	ErrNotImplemented = &ErrResponse{HTTPStatusCode: 501, StatusText: "Not implemented."}
 )
 
-func CreateUser(w http.ResponseWriter, r *http.Request) {
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(r.Body)
 	if err != nil {
 		render.JSON(w, r, ErrBadRequest)
 	}
 
-	err = user.UpdateUserAccount(dbHandle, buf)
+	err = user.UpdateUserAccount(client, buf)
 	if err != nil {
 		render.JSON(w, r, ErrBadRequest)
 	} else {
@@ -55,7 +55,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userID")
 
-	selectedUser, err := user.GetUserAccount(dbHandle, userID)
+	selectedUser, err := user.GetUserAccount(client, userID)
 	if err != nil {
 		render.JSON(w, r, ErrNotFound)
 	} else {
@@ -78,7 +78,7 @@ func UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, ErrBadRequest)
 	}
 
-	err = account.UpdateAccount(dbHandle, buf)
+	err = chain_account.UpdateAccount(client, buf)
 	if err != nil {
 		render.JSON(w, r, ErrBadRequest)
 	} else {
@@ -91,7 +91,7 @@ func UpdateAccount(w http.ResponseWriter, r *http.Request) {
 func GetAccount(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userID")
 
-	selectedAccount, err := account.GetAccounts(dbHandle, userID)
+	selectedAccount, err := chain_account.GetAccountsForUser(client, userID)
 	if err != nil {
 		render.JSON(w, r, ErrNotFound)
 	} else {
@@ -112,7 +112,7 @@ func UpdateDevice(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, ErrBadRequest)
 	}
 
-	err = device.UpdateDevice(dbHandle, buf)
+	err = device.UpdateDevice(client, buf)
 	if err != nil {
 		render.JSON(w, r, ErrBadRequest)
 	} else {
@@ -125,7 +125,7 @@ func UpdateDevice(w http.ResponseWriter, r *http.Request) {
 func GetDevice(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userID")
 
-	selectedAccount, err := device.GetDevices(dbHandle, userID)
+	selectedAccount, err := device.GetDevices(client, userID)
 	if err != nil {
 		render.JSON(w, r, ErrNotFound)
 	} else {
@@ -136,7 +136,7 @@ func GetDevice(w http.ResponseWriter, r *http.Request) {
 func DeleteDevice(w http.ResponseWriter, r *http.Request) {
 	deviceID := chi.URLParam(r, "id")
 
-	err := device.Delete(dbHandle, deviceID)
+	err := device.Delete(client, deviceID)
 	if err != nil {
 		render.JSON(w, r, ErrBadRequest)
 	} else {

@@ -7,6 +7,8 @@ import (
 	"math"
 	"math/big"
 
+	"github.com/bahelit/confirmerator/api/chain_account"
+	"github.com/bahelit/confirmerator/api/device"
 	"github.com/bahelit/confirmerator/database"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -77,7 +79,7 @@ func queryBlock(client *ethclient.Client, header *types.Header) (*types.Block, e
 	return block, nil
 }
 
-func queryTransactions(db *mongo.Client, client *ethclient.Client, block *types.Block, accounts []database.Account,
+func queryTransactions(db *mongo.Client, client *ethclient.Client, block *types.Block, accounts []chain_account.Account,
 	nc *nats.Conn, ec *nats.EncodedConn) error {
 	// We can read the transactions in a block by calling the Transaction method which returns a list of Transaction type.
 	// It's then trivial to iterate over the collection and retrieve any information regarding the transaction.
@@ -114,18 +116,17 @@ func queryTransactions(db *mongo.Client, client *ethclient.Client, block *types.
 				if tx.To().String() == acct.Address {
 					//ethAddress := shared.HexToAddress(acct.address)
 					log.Println("Confirmed Transaction!: ", acct.Address)
-					acct.Device, err = database.GetDevice(db, database.PlatformAndroid, acct.UserID)
+					deviceIdentifier, err := device.GetDevice(db, database.PlatformMobile, acct.UserID)
 					if err != nil {
 						log.Println(err)
 						continue
 					}
 
 					msg := fmt.Sprintf("Confirmed transaction for %s", acct.Nickname)
-					publishAndroid(nc, ec, chEthereumAndroid, msgTitleEthereum, acct.Device, msg)
+					publishAndroid(nc, ec, chEthereumAndroid, msgTitleEthereum, deviceIdentifier, msg)
 				}
 			}
 		}
-
 	}
 
 	return nil
@@ -154,7 +155,7 @@ func wsSubscribe(db *mongo.Client, nc *nats.Conn, ec *nats.EncodedConn, ethClien
 		case header := <-headers:
 			//fmt.Println(header.Hash().Hex()) // 0xbc10defa8dda384c96a17640d84de5578804945d347072e091b4e5f390ddea7f
 			//fmt.Println("Block number: ", header.Number)
-			ethAccounts, err := database.GetBlockchainAccounts(db, database.ChainEthereum)
+			ethAccounts, err := chain_account.GetAccountsForBlockchain(db, database.ChainEthereum)
 			if err != nil {
 				// Can't do comparisons so just continue.
 				log.Println(err)
@@ -163,7 +164,7 @@ func wsSubscribe(db *mongo.Client, nc *nats.Conn, ec *nats.EncodedConn, ethClien
 
 			block, err := queryBlock(ethClient, header)
 			if err != nil {
-				//log.Println(err)
+				log.Printf("ERROR: failed to query block: %v", err)
 				continue
 			}
 

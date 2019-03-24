@@ -2,7 +2,7 @@
 package user
 
 type User struct {
-	ID       int    `json:"id"`
+	ID       string `json:"id" bson:"_id"`
 	UID      string `json:"uid"`
 	Type     int16  `json:"type"`
 	NickName string `json:"nickname"`

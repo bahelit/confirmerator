@@ -28,6 +28,7 @@ func UpdateDevice(client *mongo.Client, b *bytes.Buffer) error {
 	//res, err := collection.InsertOne(ctx, bson.M{"name": "pi", "value": 3.14159})
 	res, err := collection.InsertOne(ctx, device)
 	if err != nil {
+		log.Printf("ERROR: failed to insert device: %v - err: %v", device, err)
 		return err
 	}
 
@@ -36,13 +37,28 @@ func UpdateDevice(client *mongo.Client, b *bytes.Buffer) error {
 	return nil
 }
 
+// GetDevice retrieve a single device associated with the user for a given platform.
+func GetDevice(client *mongo.Client, platform int16, userID string) (string, error) {
+	var device Device
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	collection := database.GetCollection(client, database.CollectionDevice)
+
+	filter := bson.M{"platform": platform, "userID": userID}
+	err := collection.FindOne(ctx, filter).Decode(&device)
+	if err != nil && err != mongo.ErrNoDocuments {
+		log.Printf("ERROR: failed to query device: %v - err: %v", userID, err)
+	}
+
+	return device.Identifier, nil
+}
+
 // GetDevices retrieve a list of devices for a given user.
 func GetDevices(client *mongo.Client, id string) ([]Device, error) {
 	devices := make([]Device, 0)
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	collection := database.GetCollection(client, collectionName)
 	user := bson.M{"_id": id}
 
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	cur, err := collection.Find(ctx, user)
 	if err != nil {
 		log.Printf("ERROR: failed to query accounts: %v", err)
@@ -55,7 +71,6 @@ func GetDevices(client *mongo.Client, id string) ([]Device, error) {
 	}()
 
 	for cur.Next(ctx) {
-		//var result bson.M
 		var account Device
 		err := cur.Decode(&account)
 		if err != nil {
@@ -72,9 +87,9 @@ func GetDevices(client *mongo.Client, id string) ([]Device, error) {
 
 func Delete(client *mongo.Client, id string) error {
 	collection := database.GetCollection(client, collectionName)
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	device := bson.M{"_id": id}
 
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	res, err := collection.DeleteOne(ctx, device)
 	if err != nil || res.DeletedCount != 1 {
 		log.Printf("ERROR: failed to to remove device, maybe it didn't exist: %v", err)

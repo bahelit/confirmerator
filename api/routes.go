@@ -8,7 +8,7 @@ func routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Get("/user/{userID}", GetUser)
 	router.Delete("/user/{rowID}", DeleteUser)
-	router.Post("/user", CreateUser)
+	router.Post("/user", UpdateUser)
 
 	router.Get("/account/{userID}", GetAccount)
 	router.Delete("/account/{rowID}", DeleteAccount)

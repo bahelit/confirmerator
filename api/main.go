@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	dbHandle   *mongo.Client
+	client     *mongo.Client
 	listenAddr string
 	listenPort string
 )
@@ -39,12 +39,12 @@ func init() {
 
 func main() {
 	var err error
-	err = database.InitDB(dbHandle)
+	client, err = database.InitDB()
 	if err != nil {
-		log.Fatal("Failed to connect to postgres", err)
+		log.Fatal("Failed to connect to mongodb", err)
 	}
 	defer func() {
-		err := dbHandle.Disconnect(context.Background())
+		err := client.Disconnect(context.Background())
 		if err != nil {
 			log.Printf("ERROR: failed to disconnect from mongo: %v", err)
 		}
