@@ -33,7 +33,7 @@ func init() {
 
 	listenPort, statusOK = os.LookupEnv(networkPort)
 	if !statusOK {
-		listenPort = "8008"
+		listenPort = "80"
 	}
 }
 

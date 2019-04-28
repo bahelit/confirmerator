@@ -13,8 +13,6 @@ import (
 )
 
 const (
-	dbuser   = "DBUSER"
-	dbpass   = "DBPASS"
 	mongoURI = "MONGOURI"
 )
 
@@ -48,11 +46,11 @@ func GetCollection(client *mongo.Client, collection string) *mongo.Collection {
 func InitDB() (*mongo.Client, error) {
 	config := dbConfig()
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config[mongoURI]))
 
 	// Check the connection
-	ctx, _ = context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, _ = context.WithTimeout(context.Background(), 30*time.Second)
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatalf("ERROR: failed to connect to mongodb: %v", err)
@@ -66,22 +64,12 @@ func InitDB() (*mongo.Client, error) {
 func dbConfig() map[string]string {
 	conf := make(map[string]string)
 
-	user, ok := os.LookupEnv(dbuser)
-	if !ok {
-		log.Print("DBUSER environment variable not set")
-	}
-	password, ok := os.LookupEnv(dbpass)
-	if !ok {
-		log.Print("DBPASS environment not set")
-	}
 	mongoURI, ok := os.LookupEnv(mongoURI)
 	if !ok {
 		mongoURI = "mongodb://localhost:27017"
-		log.Print("DBNAME environment variable set")
+		log.Print("MONGOURI environment variable set")
 	}
 
-	conf[dbuser] = user
-	conf[dbpass] = password
 	conf[mongoURI] = mongoURI
 	return conf
 }

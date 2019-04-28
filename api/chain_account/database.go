@@ -13,7 +13,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var collectionName = database.CollectionAccount
+const (
+	collectionName = database.CollectionAccount
+)
 
 // UpdateAccount add or update an account to the account table
 func UpdateAccount(client *mongo.Client, b *bytes.Buffer) error {

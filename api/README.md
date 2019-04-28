@@ -3,29 +3,20 @@
 Provides REST API to the Confirmerator project. Add/Remove users and devices
 
 
-## Quickstart
+### Quickstart
 
 Configuration is done through environment variables.
 
-Configure the http listener with:
+Configure the http listener with `LISTEN-ADDRESS` and `LISTEN-PORT`
 
-`LISTEN-ADDRESS`
+Database connection by string:
+`MONGOURI`  example  `mongodb0.example.com:27017/my_db`
 
-`LISTEN-PORT`
+Another `MONGOURI` example with credentials and replica set
+`myDBReader:D1fficultP%40ssw0rd@mongodb0.example.com:27017,mongodb1.example.com:27017,mongodb2.example.com:27017/my_db?replicaSet=myRepl`
 
-Configure the database connection with:
-
-`DBHOST`
-
-`DBPORT`
-
-`DBUSER`
-
-`DBPASS`
-
-`DBNAME`
-
-
+## Docker
+`docker build -f api/Dockerfile -t confirmerator-api . && docker run -p 80:80 --name confirmerator-api confirmerator-api`
 
 ## Contribution
 

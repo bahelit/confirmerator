@@ -20,34 +20,32 @@ Configure ethereum connection:
 
 `ETHWSURL`
 
-Configure the database connection:
+Database connection by string:
+ 
+`MONGOURI`  example  `mongodb0.example.com:27017/my_db`
 
-`DBHOST`
-
-`DBPORT`
-
-`DBUSER`
-
-`DBPASS`
-
-`DBNAME`
+Another `MONGOURI` example with credentials and replica set
+`myDBReader:D1fficultP%40ssw0rd@mongodb0.example.com:27017,mongodb1.example.com:27017,mongodb2.example.com:27017/my_db?replicaSet=myRepl`
 
 Add NATS url:
 
 `NATSURL`
 
 
+## Docker
+Example docker command
+`$ docker build -f api/Dockerfile -t confirmerator . && docker run -p 80:80 --name confirmerator confirmerator`
+
 ### TODO list
 
 * Connect to bitcoin zmq
 * Monitor smart-contracts
 * Respond to confirmation count request
-* Add support for other databases
 
 
 #### Donations
 Currently excepting donations to run the servers for the blockchain nodes and confirmerator.
-Running thee servers is a costly endeavor and any contribution would help tremendously.
+Any sized contribution would help.
 
 * BTC: 3LeENCt2EHY2xZTcJrVGjZiGwcpsEd3pK7
 * BCH: 1T7xhy8oQXUTL9UL413t7pkU7ZH7mJgfL
