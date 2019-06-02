@@ -20,7 +20,8 @@ const (
 // UpdateUserAccount add a user to the user table.
 func UpdateUserAccount(client *mongo.Client, b *bytes.Buffer) error {
 	var user User
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	collection := database.GetCollection(client, collectionName)
 	err := json.Unmarshal(b.Bytes(), &user)
 	if err != nil {
@@ -59,7 +60,8 @@ func UpdateUserAccount(client *mongo.Client, b *bytes.Buffer) error {
 // GetUserAccount get information about a user in the user.
 func GetUserAccount(client *mongo.Client, uid string) (User, error) {
 	var user User
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	collection := database.GetCollection(client, collectionName)
 
 	err := collection.FindOne(ctx, bson.M{"uid": uid}).Decode(&user)

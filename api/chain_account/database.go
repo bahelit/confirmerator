@@ -20,7 +20,8 @@ const (
 // UpdateAccount add or update an account to the account table
 func UpdateAccount(client *mongo.Client, b *bytes.Buffer) error {
 	var account Account
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	collection := database.GetCollection(client, collectionName)
 	err := json.Unmarshal(b.Bytes(), &account)
 	if err != nil {
@@ -60,7 +61,8 @@ func UpdateAccount(client *mongo.Client, b *bytes.Buffer) error {
 // A user can have multiple accounts
 func GetAccountsForUser(client *mongo.Client, userID string) ([]Account, error) {
 	accounts := make([]Account, 0)
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	collection := database.GetCollection(client, collectionName)
 
 	cur, err := collection.Find(ctx, bson.M{"userid": userID})
@@ -93,7 +95,8 @@ func GetAccountsForUser(client *mongo.Client, userID string) ([]Account, error) 
 // GetAccountsForBlockchain retrieve a list of accounts for a particular blockchain.
 func GetAccountsForBlockchain(client *mongo.Client, blockchain int16) ([]Account, error) {
 	accounts := make([]Account, 0)
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	collection := database.GetCollection(client, database.CollectionAccount)
 
 	cur, err := collection.Find(ctx, bson.M{"blockchain": blockchain})

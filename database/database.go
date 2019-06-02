@@ -46,11 +46,16 @@ func GetCollection(client *mongo.Client, collection string) *mongo.Collection {
 func InitDB() (*mongo.Client, error) {
 	config := dbConfig()
 
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config[mongoURI]))
+	if err != nil || client == nil {
+		log.Printf("ERROR: failed to connect to mongodb: %v", err)
+	}
 
 	// Check the connection
-	ctx, _ = context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatalf("ERROR: failed to connect to mongodb: %v", err)

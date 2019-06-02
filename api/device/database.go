@@ -26,7 +26,8 @@ func UpdateDevice(client *mongo.Client, b *bytes.Buffer) error {
 		return err
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	//res, err := collection.InsertOne(ctx, bson.M{"name": "pi", "value": 3.14159})
 	res, err := collection.InsertOne(ctx, device)
 	if err != nil {
@@ -42,7 +43,8 @@ func UpdateDevice(client *mongo.Client, b *bytes.Buffer) error {
 // GetDevice retrieve a single device associated with the user for a given platform.
 func GetDevice(client *mongo.Client, platform int16, userID string) (string, error) {
 	var device Device
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	collection := database.GetCollection(client, database.CollectionDevice)
 
 	filter := bson.M{"platform": platform, "userid": userID}
@@ -57,7 +59,8 @@ func GetDevice(client *mongo.Client, platform int16, userID string) (string, err
 // GetDevices retrieve a list of devices for a given user.
 func GetDevices(client *mongo.Client, id string) ([]Device, error) {
 	devices := make([]Device, 0)
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	collection := database.GetCollection(client, collectionName)
 	user := bson.M{"_id": id}
 
@@ -89,7 +92,8 @@ func GetDevices(client *mongo.Client, id string) ([]Device, error) {
 
 func Delete(client *mongo.Client, id string) error {
 	collection := database.GetCollection(client, collectionName)
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	device := bson.M{"_id": id}
 
 	res, err := collection.DeleteOne(ctx, device)
