@@ -1,9 +1,11 @@
 // Handle user related information
 package user
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type User struct {
-	ID       string `json:"id" bson:"_id"`
-	UID      string `json:"uid"`
-	Type     int16  `json:"type"`
-	NickName string `json:"nickname"`
+	ID       *primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	UID      string              `json:"uid"`
+	Type     int16               `json:"type"`
+	NickName string              `json:"nickname"`
 }

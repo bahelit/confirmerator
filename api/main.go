@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/bahelit/confirmerator/database"
-
 	"github.com/go-chi/chi"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/bahelit/confirmerator/database"
 )
 
 var (

@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"net/http"
 
+	"github.com/go-chi/chi"
+	"github.com/go-chi/render"
+
 	"github.com/bahelit/confirmerator/api/chain_account"
 	"github.com/bahelit/confirmerator/api/device"
 	"github.com/bahelit/confirmerator/api/user"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/render"
 )
 
 // ErrResponse renderer type for handling errors.
@@ -42,12 +43,15 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, ErrBadRequest)
 	}
 
-	err = user.UpdateUserAccount(client, buf)
+	userID, err := user.UpdateUserAccount(client, buf)
 	if err != nil {
 		render.JSON(w, r, ErrBadRequest)
 	} else {
 		response := make(map[string]string)
 		response["message"] = "Success"
+		if len(userID) > 0 {
+			response["id"] = userID
+		}
 		render.JSON(w, r, response)
 	}
 }
@@ -78,12 +82,15 @@ func UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, ErrBadRequest)
 	}
 
-	err = chain_account.UpdateAccount(client, buf)
+	accountID, err := chain_account.UpdateAccount(client, buf)
 	if err != nil {
 		render.JSON(w, r, ErrBadRequest)
 	} else {
 		response := make(map[string]string)
 		response["message"] = "Success"
+		if len(accountID) > 0 {
+			response["id"] = accountID
+		}
 		render.JSON(w, r, response)
 	}
 }
@@ -112,12 +119,15 @@ func UpdateDevice(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, ErrBadRequest)
 	}
 
-	err = device.UpdateDevice(client, buf)
+	deviceID, err := device.UpdateDevice(client, buf)
 	if err != nil {
 		render.JSON(w, r, ErrBadRequest)
 	} else {
 		response := make(map[string]string)
 		response["message"] = "Success"
+		if len(deviceID) > 0 {
+			response["id"] = deviceID
+		}
 		render.JSON(w, r, response)
 	}
 }

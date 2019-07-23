@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
-	"github.com/bahelit/confirmerator/database"
-
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/bahelit/confirmerator/database"
 )
 
 const (
@@ -18,26 +20,62 @@ const (
 )
 
 // CreateUserAccount add a user to the user table.
-func UpdateDevice(client *mongo.Client, b *bytes.Buffer) error {
+func UpdateDevice(client *mongo.Client, b *bytes.Buffer) (string, error) {
 	var device Device
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	collection := database.GetCollection(client, collectionName)
 	err := json.Unmarshal(b.Bytes(), &device)
 	if err != nil {
-		return err
+		log.Printf("Failed to parse: %v - err: %v", b, err)
+		return "", err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	//res, err := collection.InsertOne(ctx, bson.M{"name": "pi", "value": 3.14159})
-	res, err := collection.InsertOne(ctx, device)
-	if err != nil {
-		log.Printf("ERROR: failed to insert device: %v - err: %v", device, err)
-		return err
+	if device.ID != nil && len(device.ID.String()) != 0 {
+		filter := bson.D{{"_id", device.ID}}
+
+		update := bson.D{
+			{"$set", bson.D{
+				{"userid", device.UserID},
+				{"platform", device.Platform},
+				{"active", device.Active},
+				{"identifier", device.Identifier},
+			}},
+		}
+
+		updateResult, err := collection.UpdateOne(context.TODO(), filter, update)
+		if err != nil {
+			log.Printf("ERROR: failed to insert device: %v - err: %v", device, err)
+			return "", err
+		}
+
+		log.Printf("Matched %v device and updated %v account.\n",
+			updateResult.MatchedCount, updateResult.ModifiedCount)
+	} else {
+		res, err := collection.InsertOne(ctx, bson.D{
+			{"userid", device.UserID},
+			{"platform", device.Platform},
+			{"active", device.Active},
+			{"identifier", device.Identifier},
+		})
+		if err != nil {
+			log.Printf("ERROR: failed to insert device: %v - err: %v", device, err)
+			return "", err
+		}
+
+		if oid, ok := res.InsertedID.(primitive.ObjectID); ok {
+			idHex := map[string]interface{}{
+				"id": oid.Hex(),
+			}
+			strOID := fmt.Sprintf("%s", idHex["id"])
+			log.Printf("New device inserted: %v", strOID)
+			return strOID, nil
+		} else {
+			log.Printf("New device inserted: %s", res.InsertedID)
+		}
 	}
 
-	log.Printf("New account inserted: %v", res.InsertedID)
-
-	return nil
+	return "", nil
 }
 
 // GetDevice retrieve a single device associated with the user for a given platform.
@@ -57,14 +95,13 @@ func GetDevice(client *mongo.Client, platform int16, userID string) (string, err
 }
 
 // GetDevices retrieve a list of devices for a given user.
-func GetDevices(client *mongo.Client, id string) ([]Device, error) {
+func GetDevices(client *mongo.Client, userID string) ([]Device, error) {
 	devices := make([]Device, 0)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	collection := database.GetCollection(client, collectionName)
-	user := bson.M{"_id": id}
 
-	cur, err := collection.Find(ctx, user)
+	cur, err := collection.Find(ctx, bson.M{"userid": userID})
 	if err != nil {
 		log.Printf("ERROR: failed to query accounts: %v", err)
 	}
