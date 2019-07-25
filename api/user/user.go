@@ -7,5 +7,6 @@ type User struct {
 	ID       *primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	UID      string              `json:"uid"`
 	Type     int16               `json:"type"`
+	Email    string              `json:"email"`
 	NickName string              `json:"nickname"`
 }

@@ -27,6 +27,7 @@ func UpdateUserAccount(client *mongo.Client, b *bytes.Buffer) (string, error) {
 	collection := database.GetCollection(client, collectionName)
 	err := json.Unmarshal(b.Bytes(), &user)
 	if err != nil {
+		log.Printf("Failed to parse: %v - err: %v", b, err)
 		return "", err
 	}
 
@@ -38,6 +39,7 @@ func UpdateUserAccount(client *mongo.Client, b *bytes.Buffer) (string, error) {
 			{"$set", bson.D{
 				{"uid", user.UID},
 				{"type", user.Type},
+				{"email", user.Email},
 				{"nickname", user.NickName},
 			}},
 		}
@@ -57,6 +59,7 @@ func UpdateUserAccount(client *mongo.Client, b *bytes.Buffer) (string, error) {
 		res, err := collection.InsertOne(ctx, bson.D{
 			{"uid", user.UID},
 			{"type", user.Type},
+			{"email", user.Email},
 			{"nickname", user.NickName},
 		})
 		if err != nil {
