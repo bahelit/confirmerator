@@ -17,15 +17,6 @@ const (
 )
 
 const (
-	ChainBitcoin = iota
-	ChainEthereum
-	ChainEthereumClassic
-	ChainBitcoinCash
-	ChainCallisto
-	ChainRavenCoin
-)
-
-const (
 	PlatformWeb = iota + 1
 	PlatformMobile
 )

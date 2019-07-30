@@ -1,4 +1,4 @@
-package chain_account
+package account
 
 import (
 	"bytes"
@@ -29,6 +29,11 @@ func UpdateAccount(client *mongo.Client, b *bytes.Buffer) (string, error) {
 	if err != nil {
 		log.Printf("Failed to parse: %v - err: %v", b, err)
 		return "", err
+	}
+
+	if account.Symbol != nil {
+		StringToChain(*account.Symbol)
+		account.Symbol = nil
 	}
 
 	// If id is populated then this is an update, else it's a new account

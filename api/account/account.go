@@ -1,5 +1,5 @@
 // Handle information related to the account, tracks wallet addresses
-package chain_account
+package account
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -8,6 +8,7 @@ type Account struct {
 	UserID     string              `json:"userid"`
 	AccType    int16               `json:"account_type"`
 	Blockchain int16               `json:"blockchain"`
+	Symbol     *string             `json:"symbol,omitempty" bson:"symbol,omitempty"`
 	Address    string              `json:"address"`
 	Nickname   string              `json:"nickname"`
 }

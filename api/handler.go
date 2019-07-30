@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 
-	"github.com/bahelit/confirmerator/api/chain_account"
+	"github.com/bahelit/confirmerator/api/account"
 	"github.com/bahelit/confirmerator/api/device"
 	"github.com/bahelit/confirmerator/api/user"
 )
@@ -82,7 +82,7 @@ func UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, ErrBadRequest)
 	}
 
-	accountID, err := chain_account.UpdateAccount(client, buf)
+	accountID, err := account.UpdateAccount(client, buf)
 	if err != nil {
 		render.JSON(w, r, ErrBadRequest)
 	} else {
@@ -98,7 +98,7 @@ func UpdateAccount(w http.ResponseWriter, r *http.Request) {
 func GetAccount(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userID")
 
-	selectedAccount, err := chain_account.GetAccountsForUser(client, userID)
+	selectedAccount, err := account.GetAccountsForUser(client, userID)
 	if err != nil {
 		render.JSON(w, r, ErrNotFound)
 	} else {

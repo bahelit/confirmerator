@@ -7,15 +7,15 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/bahelit/confirmerator/api/chain_account"
-	"github.com/bahelit/confirmerator/api/device"
-	"github.com/bahelit/confirmerator/database"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/nats-io/go-nats"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/bahelit/confirmerator/api/account"
+	"github.com/bahelit/confirmerator/api/device"
+	"github.com/bahelit/confirmerator/database"
 )
 
 // getBalance Returns the current balance from the latest block.
@@ -79,7 +79,7 @@ func queryBlock(client *ethclient.Client, header *types.Header) (*types.Block, e
 	return block, nil
 }
 
-func queryTransactions(db *mongo.Client, client *ethclient.Client, block *types.Block, accounts []chain_account.Account,
+func queryTransactions(db *mongo.Client, client *ethclient.Client, block *types.Block, accounts []account.Account,
 	nc *nats.Conn, ec *nats.EncodedConn) error {
 	// We can read the transactions in a block by calling the Transaction method which returns a list of Transaction type.
 	// It's then trivial to iterate over the collection and retrieve any information regarding the transaction.
@@ -122,6 +122,7 @@ func queryTransactions(db *mongo.Client, client *ethclient.Client, block *types.
 						continue
 					}
 
+					//msg := fmt.Sprintf("Confirmed wallet %s txHash %s", acct.Nickname, tx.Hash().String())
 					msg := fmt.Sprintf("Confirmed transaction for %s", acct.Nickname)
 					publishAndroid(nc, ec, chEthereumAndroid, msgTitleEthereum, deviceIdentifier, msg)
 				}
@@ -155,7 +156,7 @@ func wsSubscribe(db *mongo.Client, nc *nats.Conn, ec *nats.EncodedConn, ethClien
 		case header := <-headers:
 			//fmt.Println(header.Hash().Hex()) // 0xbc10defa8dda384c96a17640d84de5578804945d347072e091b4e5f390ddea7f
 			//fmt.Println("Block number: ", header.Number)
-			ethAccounts, err := chain_account.GetAccountsForBlockchain(db, database.ChainEthereum)
+			ethAccounts, err := account.GetAccountsForBlockchain(db, account.ChainEthereum)
 			if err != nil {
 				// Can't do comparisons so just continue.
 				log.Println(err)

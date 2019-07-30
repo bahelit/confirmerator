@@ -6,13 +6,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/bahelit/confirmerator/api/chain_account"
-	"github.com/bahelit/confirmerator/database"
-	"github.com/bahelit/confirmerator/shared"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/nats-io/go-nats"
+
+	"github.com/bahelit/confirmerator/api/account"
+	"github.com/bahelit/confirmerator/database"
+	"github.com/bahelit/confirmerator/shared"
 )
 
 var (
@@ -68,7 +68,7 @@ func main() {
 		log.Fatal("Failed to connect to ethereum", err)
 	}
 
-	ethAccounts, err := chain_account.GetAccountsForBlockchain(client, database.ChainEthereum)
+	ethAccounts, err := account.GetAccountsForBlockchain(client, account.ChainEthereum)
 	if err != nil {
 		// Can't do comparisons so just continue.
 		log.Println(err)
