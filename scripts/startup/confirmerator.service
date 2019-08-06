@@ -1,0 +1,12 @@
+[Unit]
+Description=Confirmerator Blockchain Notifications Service
+After=network.target
+
+[Service]
+Type=simple
+PrivateTmp=true
+Environment=/etc/confirmerator.env
+ExecStart=/usr/local/bin/confirmerator
+
+[Install]
+WantedBy=multi-user.target
