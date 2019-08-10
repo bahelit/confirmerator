@@ -8,7 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/nats-io/go-nats"
+	"github.com/nats-io/nats.go"
 
 	"github.com/bahelit/confirmerator/api/account"
 	"github.com/bahelit/confirmerator/database"
