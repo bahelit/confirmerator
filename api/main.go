@@ -19,8 +19,8 @@ var (
 )
 
 const (
-	networkAddress = "LISTEN-ADDRESS"
-	networkPort    = "LISTEN-PORT"
+	networkAddress = "LISTEN_ADDRESS"
+	networkPort    = "LISTEN_PORT"
 )
 
 func init() {

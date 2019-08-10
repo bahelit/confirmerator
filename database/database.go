@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	mongoURI = "MONGOURI"
+	mongodbURI = "MONGO_URI"
 )
 
 const (
@@ -35,11 +35,12 @@ func GetCollection(client *mongo.Client, collection string) *mongo.Collection {
 
 // TODO Don't go down if we can't connect, implement retry.
 func InitDB() (*mongo.Client, error) {
-	config := dbConfig()
+	mongoURI := dbConfig()
 
+	log.Printf("INFO: mongoURI: %v", mongoURI)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config[mongoURI]))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil || client == nil {
 		log.Printf("ERROR: failed to connect to mongodb: %v", err)
 	}
@@ -57,15 +58,14 @@ func InitDB() (*mongo.Client, error) {
 	return client, nil
 }
 
-func dbConfig() map[string]string {
-	conf := make(map[string]string)
-
-	mongoURI, ok := os.LookupEnv(mongoURI)
+func dbConfig() string {
+	mongoURI, ok := os.LookupEnv(mongodbURI)
 	if !ok {
 		mongoURI = "mongodb://localhost:27017"
-		log.Print("MONGOURI environment variable set")
+		log.Print("MONGO_URI environment variable not set trying default")
 	}
 
-	conf[mongoURI] = mongoURI
-	return conf
+	log.Printf("INFO: mongoURI: %v", mongoURI)
+
+	return mongoURI
 }
