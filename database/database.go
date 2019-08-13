@@ -17,8 +17,8 @@ const (
 )
 
 const (
-	PlatformWeb = iota + 1
-	PlatformMobile
+	PlatformMobile = iota
+	PlatformWeb
 )
 
 const (
@@ -37,7 +37,6 @@ func GetCollection(client *mongo.Client, collection string) *mongo.Collection {
 func InitDB() (*mongo.Client, error) {
 	mongoURI := dbConfig()
 
-	log.Printf("INFO: mongoURI: %v", mongoURI)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
@@ -65,7 +64,7 @@ func dbConfig() string {
 		log.Print("MONGO_URI environment variable not set trying default")
 	}
 
-	log.Printf("INFO: mongoURI: %v", mongoURI)
+	//log.Printf("INFO: mongoURI: %v", mongoURI)
 
 	return mongoURI
 }

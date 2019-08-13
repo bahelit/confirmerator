@@ -60,5 +60,6 @@ func main() {
 		log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
 	}
 
+	// TODO make more robust, don't just give up.
 	log.Fatal(http.ListenAndServe(listenAddr+listenPort, router))
 }

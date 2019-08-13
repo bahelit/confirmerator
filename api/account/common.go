@@ -5,7 +5,7 @@ import "fmt"
 type Chain int16
 
 const (
-	ChainBitcoin = iota
+	ChainBitcoin = iota + 1
 	ChainEthereum
 	ChainEthereumClassic
 	ChainBitcoinCash

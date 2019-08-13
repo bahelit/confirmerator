@@ -5,6 +5,7 @@ After=network.target
 [Service]
 Type=simple
 PrivateTmp=true
+User=confirmerator
 EnvironmentFile=/etc/confirmerator.env
 ExecStart=/usr/local/bin/confirmerator
 

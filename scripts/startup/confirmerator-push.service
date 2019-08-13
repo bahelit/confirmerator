@@ -1,5 +1,5 @@
 [Unit]
-Description=Confirmerator Blockchain Notifications API Service
+Description=Confirmerator Blockchain Notifications Push Service
 After=network.target
 
 [Service]
@@ -7,7 +7,7 @@ Type=simple
 PrivateTmp=true
 User=confirmerator
 EnvironmentFile=/etc/confirmerator.env
-ExecStart=/usr/local/bin/confirmerator_api
+ExecStart=/usr/local/bin/confirmerator_push
 
 [Install]
 WantedBy=multi-user.target

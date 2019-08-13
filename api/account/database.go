@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,6 +35,12 @@ func UpdateAccount(client *mongo.Client, b *bytes.Buffer) (string, error) {
 	if account.Symbol != nil {
 		StringToChain(*account.Symbol)
 		account.Symbol = nil
+	}
+
+	// Mobile QR-Code library prefixes addresses with detected wallet type.
+	if strings.Contains(account.Address, ":") {
+		tmpStr := strings.Split(account.Address, ":")
+		account.Address = tmpStr[1]
 	}
 
 	// If id is populated then this is an update, else it's a new account
@@ -145,7 +152,7 @@ func GetAccountsForBlockchain(client *mongo.Client, blockchain int16) ([]Account
 		if err != nil {
 			log.Printf("ERROR: failed to decode account form cursor: %v", err)
 		}
-		log.Println(account)
+		//log.Println(account)
 		accounts = append(accounts, account)
 	}
 	if err := cur.Err(); err != nil {

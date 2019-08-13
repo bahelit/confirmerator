@@ -7,6 +7,17 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+type Symbol string
+
+const (
+	SymbBitcoin  = Symbol("BTC")
+	SymbEthereum = Symbol("ETH")
+)
+
+func (symbol *Symbol) ToString() string {
+	return string(*symbol)
+}
+
 // IsValidAddress validate hex address
 func IsValidAddress(address interface{}) bool {
 	re := regexp.MustCompile("^0x[0-9a-fA-F]{40}$")

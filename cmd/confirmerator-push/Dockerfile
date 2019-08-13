@@ -28,7 +28,7 @@ RUN chmod +x /usr/bin/dep
 
 COPY Gopkg.toml Gopkg.lock ./
 RUN dep ensure --vendor-only
-COPY . ./
+COPY ../../cmd/confirmerator-push ./
 
 # Build the binary
 RUN cd api

@@ -1,0 +1,10 @@
+[Unit]
+Description=NATS messaging server
+
+[Service]
+ExecStart=/usr/local/bin/nats-server -c /etc/nats.conf
+User=nats
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

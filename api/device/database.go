@@ -89,6 +89,8 @@ func GetDevice(client *mongo.Client, platform int16, userID string) (string, err
 	err := collection.FindOne(ctx, filter).Decode(&device)
 	if err != nil && err != mongo.ErrNoDocuments {
 		log.Printf("ERROR: failed to query device: %v - err: %v", userID, err)
+	} else if err != nil {
+		log.Printf("no device found: %v - err: %v", userID, err)
 	}
 
 	return device.Identifier, nil
