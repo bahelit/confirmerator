@@ -1,4 +1,4 @@
-package blockchains
+package blockchain
 
 import (
 	"context"

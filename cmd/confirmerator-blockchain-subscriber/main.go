@@ -12,7 +12,7 @@ import (
 	"github.com/nats-io/nats.go"
 
 	"github.com/bahelit/confirmerator/api/account"
-	"github.com/bahelit/confirmerator/blockchains"
+	"github.com/bahelit/confirmerator/blockchain"
 	"github.com/bahelit/confirmerator/database"
 	"github.com/bahelit/confirmerator/messaging"
 	"github.com/bahelit/confirmerator/shared"
@@ -93,7 +93,7 @@ func main() {
 
 		time.Sleep(30 * time.Second)
 
-		wsClient, err = blockchains.WebSocketReconnect(ethWSNode)
+		wsClient, err = blockchain.WebSocketReconnect(ethWSNode)
 		if err != nil {
 			log.Fatalf("ERROR: Failed to connect to ethereum node error: %s", err)
 		}
@@ -104,14 +104,14 @@ func main() {
 	for _, acct := range ethAccounts {
 		if shared.IsValidAddress(ethAddress) {
 			ethAddress := common.HexToAddress(acct.Address)
-			ethValue := blockchains.GetBalance(wsClient, ethAddress)
+			ethValue := blockchain.GetBalance(wsClient, ethAddress)
 			log.Printf("Current Balance: [ %v ] Wallet Nickname: %s", ethValue, acct.Nickname)
 			//publishEthereumAndroid(natsConn, natsEncoder, testDevice, msg)
 			//time.Sleep(30000)
 		}
 	}
 
-	err = blockchains.SubscribeWebSocket(client, natsEncoder, wsClient)
+	err = blockchain.SubscribeWebSocket(client, natsEncoder, wsClient)
 	if err != nil {
 		log.Fatalf("ERROR: Failed to subscribe to websocket error: %s", err)
 	}

@@ -20,7 +20,7 @@ func SubscribeToChannel(ec *nats.EncodedConn, subject string) {
 
 	handleMessage(notification)
 
-	// Go type Subscriber
+	//// Go type Subscriber
 	//sub, err := ec.Subscribe(subject, handleMessage)
 	//if err != nil {
 	//	log.Printf("failed to bind to channel error: %v", err)

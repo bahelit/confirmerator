@@ -8,10 +8,26 @@ when their transactions are confirmed.
 
 Currently functioning as intended for Ethereum but is with a Work-in-Progress.  
 
-
 ## Quickstart
 
-[a relative link](scripts/)
+Configuration is done through environment variables.
+
+Configure ethereum connection:
+
+`ETHURL`
+
+`ETHWSURL`
+
+Database connection by string:
+ 
+`MONGOURI`  example  `mongodb0.example.com:27017/my_db`
+
+Another `MONGOURI` example with credentials and replica set
+`myDBReader:D1fficultP%40ssw0rd@mongodb0.example.com:27017,mongodb1.example.com:27017,mongodb2.example.com:27017/my_db?replicaSet=myRepl`
+
+Add NATS url:
+
+`NATSURL`
 
 ## Docker
 

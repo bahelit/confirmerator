@@ -16,6 +16,7 @@ Another `MONGOURI` example with credentials and replica set
 `myDBReader:D1fficultP%40ssw0rd@mongodb0.example.com:27017,mongodb1.example.com:27017,mongodb2.example.com:27017/my_db?replicaSet=myRepl`
 
 ## Docker
+
 `docker build -f api/Dockerfile -t confirmerator-api . && docker run -p 80:80 --name confirmerator-api confirmerator-api`
 
 ## Contribution
@@ -35,8 +36,6 @@ Please make sure your contributions adhere to our coding guidelines:
  
  ## License
  
- Copyright (c) 2018 Michael Salmons
- 
- The confirmeratorRest binaries (i.e. all code inside of this project) is licensed under the
+  The Confirmerator binaries (i.e. all code inside of this project) is licensed under the
  [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html), also included
  in our repository in the `LICENSE` file.
