@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/bahelit/confirmerator/cmd/confirmerator-blockchain-subscriber/ethereum"
 	"log"
 	"os"
 	"time"
@@ -13,7 +14,7 @@ import (
 
 	"github.com/bahelit/confirmerator/api/account"
 	"github.com/bahelit/confirmerator/blockchain"
-	"github.com/bahelit/confirmerator/database"
+	"github.com/bahelit/confirmerator/database/mongodb"
 	"github.com/bahelit/confirmerator/messaging"
 	"github.com/bahelit/confirmerator/shared"
 )
@@ -51,7 +52,7 @@ func init() {
 }
 
 func main() {
-	client, err := database.InitDB()
+	client, err := mongodb.InitDB()
 	if err != nil || client == nil {
 		log.Fatalf("ERROR: Failed to connect to mongodb, bail'n %v", err)
 	}
@@ -89,16 +90,14 @@ func main() {
 	wsClient, err := ethclient.Dial(ethWSNode)
 	if err != nil {
 		log.Printf("ERROR: Failed to connect to ethereum web socket: %s", err)
-		wsClient.Close()
 
 		time.Sleep(30 * time.Second)
 
-		wsClient, err = blockchain.WebSocketReconnect(ethWSNode)
+		wsClient, err = ethereum.WebSocketReconnect(ethWSNode)
 		if err != nil {
 			log.Fatalf("ERROR: Failed to connect to ethereum node error: %s", err)
 		}
 	}
-	defer wsClient.Close()
 
 	// On start-up print all the ethereum accounts we are tracking to the console
 	for _, acct := range ethAccounts {
@@ -111,7 +110,7 @@ func main() {
 		}
 	}
 
-	err = blockchain.SubscribeWebSocket(client, natsEncoder, wsClient)
+	err = ethereum.SubscribeWebSocket(client, natsEncoder, wsClient)
 	if err != nil {
 		log.Fatalf("ERROR: Failed to subscribe to websocket error: %s", err)
 	}

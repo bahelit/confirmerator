@@ -11,7 +11,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/bahelit/confirmerator/database"
+	"github.com/bahelit/confirmerator/database/mongodb"
 	"github.com/bahelit/pester"
 )
 
@@ -49,7 +49,7 @@ func main() {
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println(string(respBody))
 
-	mongoClient, err = database.InitDB()
+	mongoClient, err = mongodb.InitDB()
 	if err != nil {
 		log.Fatal("Failed to connect to mongodb", err)
 	}

@@ -12,11 +12,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/bahelit/confirmerator/database"
+	"github.com/bahelit/confirmerator/database/mongodb"
 )
 
 const (
-	collectionName = database.CollectionUser
+	collectionName = mongodb.CollectionUser
 )
 
 // UpdateUserAccount add a user to the user table.
@@ -24,7 +24,7 @@ func UpdateUserAccount(client *mongo.Client, b *bytes.Buffer) (string, error) {
 	var user User
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := database.GetCollection(client, collectionName)
+	collection := mongodb.GetCollection(client, collectionName)
 	err := json.Unmarshal(b.Bytes(), &user)
 	if err != nil {
 		log.Printf("Failed to parse: %v - err: %v", b, err)
@@ -87,7 +87,7 @@ func GetUserAccount(client *mongo.Client, uid string) (User, error) {
 	var user User
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	collection := database.GetCollection(client, collectionName)
+	collection := mongodb.GetCollection(client, collectionName)
 
 	err := collection.FindOne(ctx, bson.M{"uid": uid}).Decode(&user)
 	if err != nil && err != mongo.ErrNoDocuments {

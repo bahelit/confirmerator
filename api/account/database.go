@@ -13,11 +13,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/bahelit/confirmerator/database"
+	"github.com/bahelit/confirmerator/database/mongodb"
 )
 
 const (
-	collectionName = database.CollectionAccount
+	collectionName = mongodb.CollectionAccount
 )
 
 // UpdateAccount add or update an account to the account table
@@ -25,7 +25,7 @@ func UpdateAccount(client *mongo.Client, b *bytes.Buffer) (string, error) {
 	var account Account
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := database.GetCollection(client, collectionName)
+	collection := mongodb.GetCollection(client, collectionName)
 	err := json.Unmarshal(b.Bytes(), &account)
 	if err != nil {
 		log.Printf("Failed to parse: %v - err: %v", b, err)
@@ -99,7 +99,7 @@ func GetAccountsForUser(client *mongo.Client, userID string) ([]Account, error) 
 	accounts := make([]Account, 0)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := database.GetCollection(client, collectionName)
+	collection := mongodb.GetCollection(client, collectionName)
 
 	cur, err := collection.Find(ctx, bson.M{"userid": userID})
 	if err != nil {
@@ -133,7 +133,7 @@ func GetAccountsForBlockchain(client *mongo.Client, blockchain int16) ([]Account
 	accounts := make([]Account, 0)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := database.GetCollection(client, database.CollectionAccount)
+	collection := mongodb.GetCollection(client, mongodb.CollectionAccount)
 
 	cur, err := collection.Find(ctx, bson.M{"blockchain": blockchain})
 	if err != nil {

@@ -1,5 +1,5 @@
 // Read information from the database, no writes done here.
-package database
+package mongodb
 
 import (
 	"context"

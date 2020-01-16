@@ -25,10 +25,11 @@
 #   unused-packages = true
 
 # Pull from GOPATH
+ignored = ["github.com/ethereum/go-ethereum*"]
 #[[constraint]]
 #  name = "github.com/ethereum/go-ethereum"
-#  version = "1.9.1"
-#
+#  version = "1.9.9"
+
 #[[prune.project]]
 #    name = "github.com/ethereum/go-ethereum"
 #    unused-packages = false

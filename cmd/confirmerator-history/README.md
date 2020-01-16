@@ -1,23 +1,25 @@
-# Confirmerator API
+# Confirmerator History
 
-Provides REST API to the Confirmerator project. Add/Remove users and devices
+Connect to ethereum node parse the transactions out of the box and store them in postgres for quick lookup of historical data.
 
 
 ### Quickstart
 
 Configuration is done through environment variables.
 
-Configure the http listener with `LISTEN-ADDRESS` and `LISTEN-PORT`
+Database connection by parameters:
+* `DBHOST="127.0.0.1"`
+* `DBPORT="5432"`
+* `DBUSER="postgres"`
+* `DBPASS="superSecret!"`
+* `DBNAME="confirmerator"`
 
-Database connection by string:
-`MONGOURI`  example  `mongodb0.example.com:27017/my_db`
-
-Another `MONGOURI` example with credentials and replica set
-`myDBReader:D1fficultP%40ssw0rd@mongodb0.example.com:27017,mongodb1.example.com:27017,mongodb2.example.com:27017/my_db?replicaSet=myRepl`
+Ethereum node connection parameters
+* `ETHURL=/home/treesloth/.ethereum/geth.ipc;`
 
 ## Docker
 
-`docker build -f api/Dockerfile -t confirmerator-api . && docker run -p 80:80 --name confirmerator-api confirmerator-api`
+TODO
 
 ## Contribution
 

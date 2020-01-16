@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/bahelit/confirmerator/database"
+	"github.com/bahelit/confirmerator/database/mongodb"
 )
 
 var (
@@ -39,7 +39,7 @@ func init() {
 
 func main() {
 	var err error
-	client, err = database.InitDB()
+	client, err = mongodb.InitDB()
 	if err != nil {
 		log.Fatal("Failed to connect to mongodb", err)
 	}

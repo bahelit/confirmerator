@@ -12,11 +12,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/bahelit/confirmerator/database"
+	"github.com/bahelit/confirmerator/database/mongodb"
 )
 
 const (
-	collectionName = database.CollectionDevice
+	collectionName = mongodb.CollectionDevice
 )
 
 // CreateUserAccount add a user to the user table.
@@ -24,7 +24,7 @@ func UpdateDevice(client *mongo.Client, b *bytes.Buffer) (string, error) {
 	var device Device
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := database.GetCollection(client, collectionName)
+	collection := mongodb.GetCollection(client, collectionName)
 	err := json.Unmarshal(b.Bytes(), &device)
 	if err != nil {
 		log.Printf("Failed to parse: %v - err: %v", b, err)
@@ -83,7 +83,7 @@ func GetDevice(client *mongo.Client, platform int16, userID string) (string, err
 	var device Device
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := database.GetCollection(client, database.CollectionDevice)
+	collection := mongodb.GetCollection(client, mongodb.CollectionDevice)
 
 	filter := bson.M{"platform": platform, "userid": userID}
 	err := collection.FindOne(ctx, filter).Decode(&device)
@@ -101,7 +101,7 @@ func GetDevices(client *mongo.Client, userID string) ([]Device, error) {
 	devices := make([]Device, 0)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := database.GetCollection(client, collectionName)
+	collection := mongodb.GetCollection(client, collectionName)
 
 	cur, err := collection.Find(ctx, bson.M{"userid": userID})
 	if err != nil {
@@ -130,7 +130,7 @@ func GetDevices(client *mongo.Client, userID string) ([]Device, error) {
 }
 
 func Delete(client *mongo.Client, id string) error {
-	collection := database.GetCollection(client, collectionName)
+	collection := mongodb.GetCollection(client, collectionName)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	device := bson.M{"_id": id}
